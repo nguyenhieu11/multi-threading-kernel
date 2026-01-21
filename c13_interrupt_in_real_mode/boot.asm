@@ -46,21 +46,30 @@ handle_zero:
     int 0x10 ; Call BIOS interrupt to print character in AL
     iret ; Return from interrupt
 
+handle_one:
+    mov ah, 0eh ; BIOS teletype function
+    mov al, 'V' ; Character to print on interrupt 1
+    mov bx, 0x00 ; Page number
+    int 0x10 ; Call BIOS interrupt to print character in AL
+    iret ; Return from interrupt
+
 step2:
     cli ; Clear Interrupts;
     mov ax, 0x7c0
     mov ds, ax ; Data Segment = 0x7c0
     mov es, ax ; Extra Segment = 0x7c0
     mov ax, 0x00
-    mov ss, ax ; Stack Segment = 0x7c0
+    mov ss, ax ; Stack Segment = 0x0000
     mov sp, 0x7c00 ; Stack Pointer = 0x7c00
     sti ; Enables Interrupts
 
     mov word[ss:0x00], handle_zero ; Set Divide by Zero Exception Handler
     mov word[ss:0x02], 0x7c0 ; Set Code Segment for Handler
 
-    mov ax, 0x00
-    div ax ; Trigger Divide by Zero Exception
+    mov word[ss:0x04], handle_one ; Set Interrupt 1 Handler
+    mov word[ss:0x06], 0x7c0 ; Set Code Segment for Handler
+
+    int 1
 
     mov si, message ; Load address of message into SI
     call print
