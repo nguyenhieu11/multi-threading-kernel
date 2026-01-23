@@ -60,3 +60,5 @@ _start:
 ;   bit 1 = A20 enable
 
     jmp $
+
+times 512-($ - $$) db 0
